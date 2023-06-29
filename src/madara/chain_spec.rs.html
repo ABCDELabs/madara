@@ -284,23 +284,9 @@
 <a href="#284" id="284">284</a>
 <a href="#285" id="285">285</a>
 <a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
 </pre><pre class="rust"><code><span class="kw">use </span>blockifier::execution::contract_class::ContractClass;
-<span class="kw">use </span>madara_runtime::{AuraConfig, EnableManualSeal, GrandpaConfig, RuntimeGenesisConfig, SystemConfig, WASM_BINARY};
-<span class="kw">use </span>mp_starknet::execution::types::{ContractClassWrapper, Felt252Wrapper};
+<span class="kw">use </span>madara_runtime::{AuraConfig, EnableManualSeal, GenesisConfig, GrandpaConfig, SystemConfig, WASM_BINARY};
+<span class="kw">use </span>mp_starknet::execution::types::Felt252Wrapper;
 <span class="kw">use </span>pallet_starknet::types::ContractStorageKeyWrapper;
 <span class="kw">use </span>sc_service::ChainType;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
@@ -315,7 +301,7 @@
 <span class="kw">use </span><span class="kw">super</span>::constants::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
-</span><span class="kw">pub type </span>ChainSpec = sc_service::GenericChainSpec&lt;RuntimeGenesisConfig&gt;;
+</span><span class="kw">pub type </span>ChainSpec = sc_service::GenericChainSpec&lt;GenesisConfig&gt;;
 
 <span class="doccomment">/// Specialized `ChainSpec` for development.
 </span><span class="kw">pub type </span>DevChainSpec = sc_service::GenericChainSpec&lt;DevGenesisExt&gt;;
@@ -327,7 +313,7 @@
 </span><span class="attr">#[derive(Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>DevGenesisExt {
     <span class="doccomment">/// Genesis config.
-    </span>genesis_config: RuntimeGenesisConfig,
+    </span>genesis_config: GenesisConfig,
     <span class="doccomment">/// The flag that if enable manual-seal mode.
     </span>enable_manual_seal: <span class="prelude-ty">Option</span>&lt;bool&gt;,
 }
@@ -402,14 +388,8 @@
             testnet_genesis(
                 wasm_binary,
                 <span class="comment">// Initial PoA authorities
-                </span><span class="macro">vec!</span>[
-                    authority_keys_from_seed(<span class="string">&quot;Alice&quot;</span>),
-                    authority_keys_from_seed(<span class="string">&quot;Bob&quot;</span>),
-                    authority_keys_from_seed(<span class="string">&quot;Charlie&quot;</span>),
-                    authority_keys_from_seed(<span class="string">&quot;Dave&quot;</span>),
-                    authority_keys_from_seed(<span class="string">&quot;Eve&quot;</span>),
-                    authority_keys_from_seed(<span class="string">&quot;Ferdie&quot;</span>),
-                ],
+                // Intended to be only 2
+                </span><span class="macro">vec!</span>[authority_keys_from_seed(<span class="string">&quot;Alice&quot;</span>), authority_keys_from_seed(<span class="string">&quot;Bob&quot;</span>)],
                 <span class="bool-val">true</span>,
             )
         },
@@ -457,33 +437,28 @@
     wasm_binary: <span class="kw-2">&amp;</span>[u8],
     initial_authorities: Vec&lt;(AuraId, GrandpaId)&gt;,
     _enable_println: bool,
-) -&gt; RuntimeGenesisConfig {
+) -&gt; GenesisConfig {
     <span class="comment">// ACCOUNT CONTRACT
     </span><span class="kw">let </span>no_validate_account_class =
-        get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/NoValidateAccount.json&quot;</span>)).try_into().unwrap();
+        get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/NoValidateAccount.json&quot;</span>));
     <span class="kw">let </span>no_validate_account_class_hash = Felt252Wrapper::from_hex_be(NO_VALIDATE_ACCOUNT_CLASS_HASH).unwrap();
     <span class="kw">let </span>no_validate_account_address = Felt252Wrapper::from_hex_be(NO_VALIDATE_ACCOUNT_ADDRESS).unwrap();
 
     <span class="comment">// ARGENT ACCOUNT CONTRACT
-    </span><span class="kw">let </span>argent_account_class =
-        get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/ArgentAccount.json&quot;</span>)).try_into().unwrap();
+    </span><span class="kw">let </span>argent_account_class = get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/ArgentAccount.json&quot;</span>));
     <span class="kw">let </span>argent_account_class_hash = Felt252Wrapper::from_hex_be(ARGENT_ACCOUNT_CLASS_HASH).unwrap();
     <span class="kw">let </span>argent_account_address = Felt252Wrapper::from_hex_be(ARGENT_ACCOUNT_ADDRESS).unwrap();
-    <span class="kw">let </span>argent_proxy_class =
-        get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/Proxy.json&quot;</span>)).try_into().unwrap();
+    <span class="kw">let </span>argent_proxy_class = get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/Proxy.json&quot;</span>));
     <span class="kw">let </span>argent_proxy_class_hash = Felt252Wrapper::from_hex_be(ARGENT_PROXY_CLASS_HASH).unwrap();
 
     <span class="comment">// OZ ACCOUNT CONTRACT
     </span><span class="kw">let </span>oz_account_class =
-        get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/OpenzeppelinAccount.json&quot;</span>))
-            .try_into()
-            .unwrap();
+        get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/OpenzeppelinAccount.json&quot;</span>));
     <span class="kw">let </span>oz_account_class_hash = Felt252Wrapper::from_hex_be(OZ_ACCOUNT_CLASS_HASH).unwrap();
     <span class="kw">let </span>oz_account_address = Felt252Wrapper::from_hex_be(OZ_ACCOUNT_ADDRESS).unwrap();
 
     <span class="comment">// TEST CONTRACT
-    </span><span class="kw">let </span>test_contract_class =
-        get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/test.json&quot;</span>)).try_into().unwrap();
+    </span><span class="kw">let </span>test_contract_class = get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/test.json&quot;</span>));
     <span class="kw">let </span>test_contract_class_hash = Felt252Wrapper::from_hex_be(TEST_CONTRACT_CLASS_HASH).unwrap();
     <span class="kw">let </span>test_contract_address = Felt252Wrapper::from_hex_be(TEST_CONTRACT_ADDRESS).unwrap();
 
@@ -492,27 +467,24 @@
     <span class="kw">let </span>fee_token_class_hash = Felt252Wrapper::from_hex_be(FEE_TOKEN_CLASS_HASH).unwrap();
 
     <span class="comment">// ERC20 CONTRACT
-    </span><span class="kw">let </span>erc20_class: ContractClassWrapper =
-        get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/ERC20.json&quot;</span>)).try_into().unwrap();
+    </span><span class="kw">let </span>erc20_class = get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/ERC20.json&quot;</span>));
     <span class="kw">let </span>token_class_hash = Felt252Wrapper::from_hex_be(ERC20_CLASS_HASH).unwrap();
     <span class="kw">let </span>token_contract_address = Felt252Wrapper::from_hex_be(ERC20_ADDRESS).unwrap();
 
     <span class="comment">// ERC721 CONTRACT
-    </span><span class="kw">let </span>erc721_class: ContractClassWrapper =
-        get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/ERC721.json&quot;</span>)).try_into().unwrap();
+    </span><span class="kw">let </span>erc721_class = get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/ERC721.json&quot;</span>));
     <span class="kw">let </span>nft_class_hash = Felt252Wrapper::from_hex_be(ERC721_CLASS_HASH).unwrap();
     <span class="kw">let </span>nft_contract_address = Felt252Wrapper::from_hex_be(ERC721_ADDRESS).unwrap();
 
     <span class="comment">// UDC CONTRACT
-    </span><span class="kw">let </span>udc_class: ContractClassWrapper =
-        get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/UniversalDeployer.json&quot;</span>)).try_into().unwrap();
+    </span><span class="kw">let </span>udc_class = get_contract_class(<span class="macro">include_bytes!</span>(<span class="string">&quot;../../../cairo-contracts/build/UniversalDeployer.json&quot;</span>));
     <span class="kw">let </span>udc_class_hash = Felt252Wrapper::from_hex_be(UDC_CLASS_HASH).unwrap();
     <span class="kw">let </span>udc_contract_address = Felt252Wrapper::from_hex_be(UDC_CONTRACT_ADDRESS).unwrap();
 
     <span class="kw">let </span>public_key = Felt252Wrapper::from_hex_be(PUBLIC_KEY).unwrap();
     <span class="kw">let </span>chain_id = Felt252Wrapper(FieldElement::from_byte_slice_be(<span class="kw-2">&amp;</span>CHAIN_ID_STARKNET_TESTNET.to_be_bytes()).unwrap());
 
-    RuntimeGenesisConfig {
+    GenesisConfig {
         system: SystemConfig {
             <span class="comment">// Add Wasm runtime to storage.
             </span>code: wasm_binary.to_vec(),
